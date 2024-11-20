@@ -9,7 +9,23 @@ namespace WebGoatCore.Models
         public int OrderId { get; set; }
         public int ProductId { get; set; }
         public double UnitPrice { get; set; }
-        public short Quantity { get; set; }
+        //public short Quantity { get; set; }
+        private short _quantity;
+
+        public short Quantity
+        {
+            get { return _quantity; }
+            set 
+            { 
+                if (value < 1)
+                    throw new ArgumentOutOfRangeException(nameof(Quantity));
+                if (Product != null)
+                    if (value > Product.UnitsInStock)
+                        throw new ArgumentOutOfRangeException(nameof(Quantity));
+                _quantity = value;
+            }
+        }
+
         public float Discount { get; set; }
 
         public virtual Order Order { get; set; }
