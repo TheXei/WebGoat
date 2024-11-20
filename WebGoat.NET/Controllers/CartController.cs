@@ -3,6 +3,7 @@ using WebGoatCore.Models.OrderDetailDomainPrimitives;
 using WebGoatCore.Data;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using NLog;
 
 namespace WebGoatCore.Controllers
 {
@@ -10,6 +11,7 @@ namespace WebGoatCore.Controllers
     public class CartController : Controller
     {
         private readonly ProductRepository _productRepository;
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public CartController(ProductRepository productRepository)
         {
@@ -31,39 +33,76 @@ namespace WebGoatCore.Controllers
             return View(GetCart());
         }
 
-        [HttpPost("{productId}")]
-        public IActionResult AddOrder(int productId, short quantity)
-        {
-            if(quantity <= 0)
-            {
-                return RedirectToAction("Details", "Product", new { productId = productId, quantity = quantity });
-            }
+        // [HttpPost("{productId}")]
+        // public IActionResult AddOrder(int productId, [FromForm]short quantity)
+        // {
+        //     logger.Debug($"1quantity: {quantity}");
+        //     if(quantity <= 0)
+        //     {
+        //         return RedirectToAction("Details", "Product", new { productId = productId, quantity = quantity });
+        //     }
 
-            var product = _productRepository.GetProductById(productId);
+        //     var product = _productRepository.GetProductById(productId);
             
-            var cart = GetCart();
-            if(!cart.OrderDetails.ContainsKey(productId))
-            {
-                var orderDetail = new OrderDetail()
-                {
-                    ProductId = productId, 
-                    UnitPrice = product.UnitPrice, 
-                    Quantity = new Quantity(quantity),//, product.UnitsInStock), 
-                    Discount = 0.0F, 
-                    Product = product
-                };
-                cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
-            }
-            else
-            {
-                var originalOrder = cart.OrderDetails[productId];
-                originalOrder.Quantity.AddAdditionalQuantity(quantity);
-            }
+        //     var cart = GetCart();
+        //     if(!cart.OrderDetails.ContainsKey(productId))
+        //     {
+        //         logger.Debug($"2quantity: {quantity}");
+        //         var orderDetail = new OrderDetail()
+        //         {
+        //             ProductId = productId, 
+        //             UnitPrice = product.UnitPrice, 
+        //             Quantity = new Quantity(quantity),//, product.UnitsInStock), 
+        //             Discount = 0.0F, 
+        //             Product = product
+        //         };
+        //         cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
+        //     }
+        //     else
+        //     {
+        //         var originalOrder = cart.OrderDetails[productId];
+        //         originalOrder.Quantity.AddAdditionalQuantity(quantity);
+        //     }
 
-            HttpContext.Session.Set("Cart", cart);
+        //     HttpContext.Session.Set("Cart", cart);
 
-            return RedirectToAction("Index");
-        }
+        //     return RedirectToAction("Index");
+        // }
+        [HttpPost("{productId}")]
+public IActionResult AddOrder(int productId, [FromForm] short quantity)
+{
+    if (!ModelState.IsValid)
+    {
+        // Return an error message if the model is invalid
+        return View("Error");
+    }
+
+    var product = _productRepository.GetProductById(productId);
+
+    var cart = GetCart();
+    if (!cart.OrderDetails.ContainsKey(productId))
+    {
+        var orderDetail = new OrderDetail()
+        {
+            ProductId = productId,
+            UnitPrice = product.UnitPrice,
+            Quantity = new Quantity(quantity),
+            Discount = 0.0F,
+            Product = product
+        };
+        cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
+    }
+    else
+    {
+        var originalOrder = cart.OrderDetails[productId];
+        originalOrder.Quantity.AddAdditionalQuantity(quantity);
+    }
+
+    HttpContext.Session.Set("Cart", cart);
+
+    return RedirectToAction("Index");
+}
+
 
         [HttpGet("{productId}")]
         public IActionResult RemoveOrder(int productId)

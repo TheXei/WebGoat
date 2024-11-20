@@ -28,7 +28,7 @@ namespace WebGoatCore.Data
                 // Turn this query to standard LINQ expression, because EF Core can't handle the remaining part
                 .AsEnumerable()
                 .GroupBy(od => od.Product)
-                .OrderByDescending(g => g.Sum(t => t.UnitPrice * t.Quantity.GetValue()))
+                .OrderByDescending(g => g.Sum(t => t.UnitPrice * t.Quantity.Value))
                 .Select(g => g.Key)
                 .Take(numberOfProductsToReturn)
                 .ToList();

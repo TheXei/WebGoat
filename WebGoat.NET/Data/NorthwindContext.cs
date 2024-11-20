@@ -68,7 +68,7 @@ namespace WebGoatCore.Data
             modelBuilder.Entity<OrderDetail>()
                 .Property(od => od.Quantity)
                 .HasConversion(
-                    v => v.GetValue(),           // Convert Quantity to short for the database
+                    v => v.Value,           // Convert Quantity to short for the database
                     v => new Quantity(v)//, 1000)      // Placeholder for UnitsInStock; will be updated dynamically
                 )
                 .HasColumnName("Quantity"); // Ensure column name matches

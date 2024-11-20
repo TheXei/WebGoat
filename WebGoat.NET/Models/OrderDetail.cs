@@ -23,7 +23,7 @@ namespace WebGoatCore.Models
             }
             set
             {
-                _quantityValue = value.GetValue(); // Store only the value for EF
+                _quantityValue = value.Value; // Store only the value for EF
             }
         }
         public float Discount { get; set; }
