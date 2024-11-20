@@ -1,4 +1,5 @@
 ﻿using WebGoatCore.Models;
+using WebGoatCore.Models.OrderDetailDomainPrimitives;
 using WebGoatCore.Data;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -43,7 +44,14 @@ namespace WebGoatCore.Controllers
             var cart = GetCart();
             if(!cart.OrderDetails.ContainsKey(productId))
             {
-                var orderDetail = new OrderDetail(productId,product.UnitPrice,quantity,0.0F,product);
+                var orderDetail = new OrderDetail()
+                {
+                    ProductId = productId, 
+                    UnitPrice = product.UnitPrice, 
+                    Quantity = new Quantity(quantity),//, product.UnitsInStock), 
+                    Discount = 0.0F, 
+                    Product = product
+                };
                 cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
             }
             else

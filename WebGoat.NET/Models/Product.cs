@@ -17,7 +17,7 @@ namespace WebGoatCore.Models
         [Display(Name = "Unit price:")]
         public double UnitPrice { get; set; }
         [Display(Name = "Units in stock:")]
-        public short UnitsInStock { get; set; }
+        public short UnitsInStock { get; set; } = 1;
         [Display(Name = "Units on order:")]
         public short UnitsOnOrder { get; set; }
         [Display(Name = "Reorder level:")]

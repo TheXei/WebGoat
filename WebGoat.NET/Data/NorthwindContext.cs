@@ -1,7 +1,9 @@
 ﻿using WebGoatCore.Models;
+using WebGoatCore.Models.OrderDetailDomainPrimitives;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Proxies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Data.Sqlite;
 using System.IO;
@@ -53,13 +55,30 @@ namespace WebGoatCore.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<OrderDetail>().HasKey(a => new { a.ProductId, a.OrderId });
+            modelBuilder.Entity<OrderDetail>()
+                .HasKey(a => new { a.ProductId, a.OrderId});
+
+                        // Configuring the relationship between OrderDetail and Product
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Product) // One Product for each OrderDetail
+                .WithMany()               // Allow multiple OrderDetails for one Product
+                .HasForeignKey(od => od.ProductId);
+
+            // Configuring EF to map Quantity via its backing field
+            modelBuilder.Entity<OrderDetail>()
+                .Property(od => od.Quantity)
+                .HasConversion(
+                    v => v.GetValue(),           // Convert Quantity to short for the database
+                    v => new Quantity(v)//, 1000)      // Placeholder for UnitsInStock; will be updated dynamically
+                )
+                .HasColumnName("Quantity"); // Ensure column name matches
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseLoggerFactory(_myLoggerFactory);
             optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.UseLazyLoadingProxies();
         }
     }
 }
