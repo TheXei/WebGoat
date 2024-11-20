@@ -43,20 +43,13 @@ namespace WebGoatCore.Controllers
             var cart = GetCart();
             if(!cart.OrderDetails.ContainsKey(productId))
             {
-                var orderDetail = new OrderDetail()
-                {
-                    Discount = 0.0F,
-                    ProductId = productId,
-                    Quantity = quantity,
-                    Product = product,
-                    UnitPrice = product.UnitPrice
-                };
+                var orderDetail = new OrderDetail(productId,product.UnitPrice,quantity,0.0F,product);
                 cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
             }
             else
             {
                 var originalOrder = cart.OrderDetails[productId];
-                originalOrder.Quantity += quantity;
+                originalOrder.Quantity.AddAdditionalQuantity(quantity);
             }
 
             HttpContext.Session.Set("Cart", cart);
