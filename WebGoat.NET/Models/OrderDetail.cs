@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -15,14 +16,22 @@ namespace WebGoatCore.Models
         public short Quantity
         {
             get { return _quantity; }
-            set 
-            { 
-                if (value < 1)
-                    throw new ArgumentOutOfRangeException(nameof(Quantity));
-                if (Product != null)
-                    if (value > Product.UnitsInStock)
+            set
+            {
+                try
+                {
+                    if (value < 1)
                         throw new ArgumentOutOfRangeException(nameof(Quantity));
-                _quantity = value;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    throw;
+                }
+                finally
+                {
+                     _quantity = value;
+                }
+
             }
         }
 
