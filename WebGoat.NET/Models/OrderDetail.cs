@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using WebGoat.NET.Utils;
 using WebGoatCore.Models.OrderDetailDomainPrimitives;
+using Newtonsoft.Json;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 namespace WebGoatCore.Models
@@ -11,20 +13,23 @@ namespace WebGoatCore.Models
         public int ProductId { get; set; }
         public double UnitPrice { get; set; }
 
-        private short _quantityValue;
+        private short quantity;
+
+        [JsonConverter(typeof(QuantityConverter))]
         public Quantity Quantity
         {
             get
             {
                 // Ensure the Product is loaded before accessing UnitsInStock
-                if (Product == null)
-                    return new Quantity(_quantityValue);//, 10);
+                //if (Product == null)
+                //    return new Quantity(quantity);//, 10);
 
-                return new Quantity(_quantityValue);//, Product.UnitsInStock);
+                //return new Quantity(quantity);//, Product.UnitsInStock);
+                return new(quantity);
             }
             set
             {
-                _quantityValue = value.Value; // Store only the value for EF
+                quantity = value.Value; // Store only the value for EF
             }
         }
         public float Discount { get; set; }
@@ -44,6 +49,6 @@ namespace WebGoatCore.Models
         // }
 
         public decimal DecimalUnitPrice => Convert.ToDecimal(this.UnitPrice);
-        public decimal ExtendedPrice => DecimalUnitPrice * Convert.ToDecimal(1 - Discount) * _quantityValue;
+        public decimal ExtendedPrice => DecimalUnitPrice * Convert.ToDecimal(1 - Discount) * quantity;
     }
 }

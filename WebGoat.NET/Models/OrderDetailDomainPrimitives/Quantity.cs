@@ -1,7 +1,10 @@
 using System;
+using Newtonsoft.Json;
+using WebGoat.NET.Utils;
 
 namespace WebGoatCore.Models.OrderDetailDomainPrimitives
 {
+    [JsonConverter(typeof(QuantityConverter))]
     public class Quantity
     {
         public short Value {get; private set;}
@@ -14,6 +17,8 @@ namespace WebGoatCore.Models.OrderDetailDomainPrimitives
             ValidateQuantity(quantity);
             Value = quantity;
         }
+
+        private Quantity() { }
         private void ValidateQuantity(short quantity)
         {
             if (IsLessThanMinimum(quantity))

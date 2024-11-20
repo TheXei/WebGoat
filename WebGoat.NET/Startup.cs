@@ -14,6 +14,7 @@ using System.Reflection;
 using Microsoft.Extensions.FileProviders;
 using WebGoatCore.Controllers;
 using WebGoatCore.Exceptions;
+using WebGoat.NET.Utils;
 
 namespace WebGoatCore
 {
@@ -111,7 +112,8 @@ namespace WebGoatCore
 
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                Converters = { new QuantityConverter() } // Ensure this is included
             };
 
             services.AddScoped<CustomerRepository>();
