@@ -10,6 +10,7 @@ namespace WebGoatCore.Models
         public int OrderId { get; set; }
         public int ProductId { get; set; }
         public double UnitPrice { get; set; }
+
         private short _quantityValue;
         public Quantity Quantity
         {
