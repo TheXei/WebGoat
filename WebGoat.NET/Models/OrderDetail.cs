@@ -11,7 +11,7 @@ namespace WebGoatCore.Models
         public int ProductId { get; set; }
         public double UnitPrice { get; set; }
         //public short Quantity { get; set; }
-        private short _quantity;
+        private short _quantity = 1;
 
         public short Quantity
         {
@@ -20,7 +20,7 @@ namespace WebGoatCore.Models
             {
                 try
                 {
-                    if (value < 1)
+                    if (value <= 0)
                         throw new ArgumentOutOfRangeException(nameof(Quantity));
                 }
                 catch (ArgumentOutOfRangeException)
