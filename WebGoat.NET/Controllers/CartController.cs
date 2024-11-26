@@ -33,34 +33,43 @@ namespace WebGoatCore.Controllers
         [HttpPost("{productId}")]
         public IActionResult AddOrder(int productId, short quantity)
         {
-            if(quantity <= 0)
+            try
             {
-                return RedirectToAction("Details", "Product", new { productId = productId, quantity = quantity });
-            }
-
-            var product = _productRepository.GetProductById(productId);
-            
-            var cart = GetCart();
-            if(!cart.OrderDetails.ContainsKey(productId))
-            {
-                var orderDetail = new OrderDetail()
+                if (quantity <= 0)
                 {
-                    Discount = 0.0F,
-                    ProductId = productId,
-                    Quantity = quantity,
-                    Product = product,
-                    UnitPrice = product.UnitPrice
-                };
-                cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
+                    return RedirectToAction("Details", "Product", new { productId = productId, quantity = quantity });
+                }
+
+                var product = _productRepository.GetProductById(productId);
+
+                if (quantity > product.UnitsInStock)
+                    throw new ArgumentOutOfRangeException(nameof(quantity));
+
+                var cart = GetCart();
+                if (!cart.OrderDetails.ContainsKey(productId))
+                {
+                    var orderDetail = new OrderDetail()
+                    {
+                        Discount = 0.0F,
+                        ProductId = productId,
+                        Quantity = quantity,
+                        Product = product,
+                        UnitPrice = product.UnitPrice
+                    };
+                    cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
+                }
+                else
+                {
+                    var originalOrder = cart.OrderDetails[productId];
+                    originalOrder.Quantity += quantity;
+                }
+
+                HttpContext.Session.Set("Cart", cart);
             }
-            else
+            catch (ArgumentOutOfRangeException)
             {
-                var originalOrder = cart.OrderDetails[productId];
-                originalOrder.Quantity += quantity;
+                throw;
             }
-
-            HttpContext.Session.Set("Cart", cart);
-
             return RedirectToAction("Index");
         }
 

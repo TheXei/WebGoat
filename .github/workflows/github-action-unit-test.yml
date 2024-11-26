@@ -1,0 +1,17 @@
+name: test .Net app
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        working-directory: ./Webgoat.Net-Tests
+        run: dotnet test
