@@ -33,44 +33,51 @@ namespace WebGoatCore.Controllers
         [HttpPost("{productId}")]
         public IActionResult AddOrder(int productId, short quantity)
         {
-            try
+            if (quantity <= 0)
             {
-                if (quantity <= 0)
-                {
-                    return RedirectToAction("Details", "Product", new { productId = productId, quantity = quantity });
-                }
-
-                var product = _productRepository.GetProductById(productId);
-
-                if (quantity > product.UnitsInStock)
-                    throw new ArgumentOutOfRangeException(nameof(quantity));
-
-                var cart = GetCart();
-                if (!cart.OrderDetails.ContainsKey(productId))
-                {
-                    var orderDetail = new OrderDetail()
-                    {
-                        Discount = 0.0F,
-                        ProductId = productId,
-                        Quantity = quantity,
-                        Product = product,
-                        UnitPrice = product.UnitPrice
-                    };
-                    cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
-                }
-                else
-                {
-                    var originalOrder = cart.OrderDetails[productId];
-                    originalOrder.Quantity += quantity;
-                }
-
-                HttpContext.Session.Set("Cart", cart);
+                return BadRequest(new {
+                    Message = "Requested quantity is 0, please enter a positive number."
+                });            
             }
-            catch (ArgumentOutOfRangeException)
+
+            var product = _productRepository.GetProductById(productId);
+
+            if (quantity > product.UnitsInStock)
+                return BadRequest(new {
+                    Message = "Requested quantity is higher than what we have in stock, please call customer service if you wish to continue with this amount.",
+                    StockQuantity = product.UnitsInStock
+                });
+                
+            var cart = GetCart();
+            if (cart.OrderDetails.ContainsKey(productId))
             {
-                throw;
+                var originalOrder = cart.OrderDetails[productId];
+
+                if (originalOrder.Quantity + quantity > product.UnitsInStock)
+                    return BadRequest(new {
+                        Message = "Requested quantity is higher than what we have in stock, please call customer service if you wish to continue with this amount.",
+                        StockQuantity = product.UnitsInStock
+                    });
+
+                originalOrder.Quantity += quantity;
             }
-            return RedirectToAction("Index");
+
+            else
+            {
+                var orderDetail = new OrderDetail()
+                {
+                    Discount = 0.0F,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    Product = product,
+                    UnitPrice = product.UnitPrice
+                };
+                cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
+            }
+
+
+            HttpContext.Session.Set("Cart", cart);
+        return RedirectToAction("Index");
         }
 
         [HttpGet("{productId}")]
