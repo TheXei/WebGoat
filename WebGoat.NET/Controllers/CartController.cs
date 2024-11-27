@@ -69,39 +69,39 @@ namespace WebGoatCore.Controllers
         //     return RedirectToAction("Index");
         // }
         [HttpPost("{productId}")]
-public IActionResult AddOrder(int productId, [FromForm] short quantity)
-{
-    if (!ModelState.IsValid)
-    {
-        // Return an error message if the model is invalid
-        return View("Error");
-    }
-
-    var product = _productRepository.GetProductById(productId);
-
-    var cart = GetCart();
-    if (!cart.OrderDetails.ContainsKey(productId))
-    {
-        var orderDetail = new OrderDetail()
+        public IActionResult AddOrder(int productId, [FromForm] short quantity)
         {
-            ProductId = productId,
-            UnitPrice = product.UnitPrice,
-            Quantity = new Quantity(quantity),
-            Discount = 0.0F,
-            Product = product
-        };
-        cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
-    }
-    else
-    {
-        var originalOrder = cart.OrderDetails[productId];
-        originalOrder.Quantity.AddAdditionalQuantity(quantity);
-    }
+            if (!ModelState.IsValid)
+            {
+                // Return an error message if the model is invalid
+                return View("Error");
+            }
 
-    HttpContext.Session.Set("Cart", cart);
+            var product = _productRepository.GetProductById(productId);
 
-    return RedirectToAction("Index");
-}
+            var cart = GetCart();
+            if (!cart.OrderDetails.ContainsKey(productId))
+            {
+                var orderDetail = new OrderDetail()
+                {
+                    ProductId = productId,
+                    UnitPrice = product.UnitPrice,
+                    Quantity = new Quantity(quantity),
+                    Discount = 0.0F,
+                    Product = product
+                };
+                cart.OrderDetails.Add(orderDetail.ProductId, orderDetail);
+            }
+            else
+            {
+                var originalOrder = cart.OrderDetails[productId];
+                originalOrder.Quantity.AddAdditionalQuantity(quantity);
+            }
+
+            HttpContext.Session.Set("Cart", cart);
+
+            return RedirectToAction("Index");
+        }
 
 
         [HttpGet("{productId}")]
